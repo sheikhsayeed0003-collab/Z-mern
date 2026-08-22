@@ -59,9 +59,6 @@ export function Footer() {
                 <li>Email: support@iotprogrammers.com</li>
                 <li>Dhaka, Bangladesh</li>
               </ul>
-              <p className="mt-5 text-xs text-white/45">
-                Sat–Thu · 9:00 AM – 10:00 PM
-              </p>
             </div>
           </div>
         </div>
@@ -113,9 +110,6 @@ export function Footer() {
               <li>Email: support@iotprogrammers.com</li>
               <li>Dhaka, Bangladesh</li>
             </ul>
-            <p className="mt-5 text-xs text-white/45">
-              Sat–Thu · 9:00 AM – 10:00 PM
-            </p>
           </div>
         </div>
 
