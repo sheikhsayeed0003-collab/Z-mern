@@ -124,13 +124,15 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/health", (_req, res) => {
+  const mongoConfigured = Boolean(
+    (process.env.MONGODB_URI || process.env.MONGO_URI || "").trim()
+  );
   res.json({
+    status: "ok",
     ok: true,
+    mongoConfigured,
     stripe: Boolean(process.env.STRIPE_SECRET_KEY),
     webhook: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
-    mongoConfigured: Boolean(
-      (process.env.MONGODB_URI || process.env.MONGO_URI || "").trim()
-    ),
   });
 });
 
