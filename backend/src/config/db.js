@@ -4,15 +4,26 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 let memoryServer;
 
 async function connectDB() {
-  const isProd = process.env.NODE_ENV === "production";
-  let uri = (process.env.MONGODB_URI || "").trim();
+  // Prefer Atlas URI whenever it exists (Vercel injects this at runtime).
+  let uri = (
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URI ||
+    process.env.DATABASE_URL ||
+    ""
+  ).trim();
   const forceMemory = process.env.USE_MEMORY_DB === "true";
+  const onVercel = Boolean(process.env.VERCEL);
+  const isProd = process.env.NODE_ENV === "production" || onVercel;
 
-  // Production always needs Atlas (or any persistent URI). Memory DB cannot run on Vercel.
   if (isProd) {
     if (!uri) {
+      console.error("DB env check", {
+        hasMongoUri: Boolean(process.env.MONGODB_URI),
+        nodeEnv: process.env.NODE_ENV,
+        vercel: process.env.VERCEL || null,
+      });
       throw new Error(
-        "Missing MONGODB_URI. In Vercel → Settings → Environment Variables, set MONGODB_URI (mongodb+srv://...) and USE_MEMORY_DB=false for Production + Preview, then Redeploy."
+        "Missing MONGODB_URI on this deployment. Add it in Vercel → Project → Settings → Environment Variables (Production + Preview), then Redeploy."
       );
     }
     if (forceMemory) {

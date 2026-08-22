@@ -55,7 +55,7 @@ export default function HomePage() {
       <div className="mx-auto w-full space-y-8 px-3 py-8 sm:space-y-10 sm:py-10 lg:px-2.5">
         {error && (
           <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}. Start the API (`cd backend && npm run dev`) and seed data (`npm run seed`).
+            {error}
           </p>
         )}
 
