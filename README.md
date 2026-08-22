@@ -72,22 +72,22 @@ npm run stripe:listen
 
 Forwards events to `http://localhost:5000/api/webhooks/stripe`.
 
-#### Live / production (same features as local)
+#### Live / production (Vercel Services — one project)
 
-Store, cart, COD/Stripe, webhook, user dashboard, and admin all work live the same way.
+Root `vercel.json` deploys `frontend/` (Next.js) + `backend/` (Express) together.
+Public `/api/*` goes to Express; everything else goes to Next.js.
 
-| Piece | Example host | Required env |
-|-------|--------------|--------------|
-| Frontend | Vercel | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_live_`) |
-| Backend | Render / Railway | See [LIVE.env.example](LIVE.env.example) |
+| Piece | Where | Required env |
+|-------|--------|--------------|
+| App | Vercel (Services preset) | See [LIVE.env.example](LIVE.env.example) |
 | Database | MongoDB Atlas | `USE_MEMORY_DB=false`, `MONGODB_URI` |
-| Stripe webhook | Dashboard Live mode | `https://YOUR_API/api/webhooks/stripe` + `checkout.session.completed` |
+| Stripe webhook | Dashboard Live mode | `https://YOUR_DOMAIN/api/webhooks/stripe` + `checkout.session.completed` |
 
 Steps:
-1. Deploy API (`backend/`, `npm start`) with production env
-2. Deploy frontend with `NEXT_PUBLIC_API_URL=https://your-api-domain`
-3. Set live Stripe keys + Dashboard webhook signing secret
-4. Set `CLIENT_URL` to the live site URL
+1. In Vercel: Framework = **Services**, connect this Git repo (root)
+2. Add env vars from `LIVE.env.example` (leave `NEXT_PUBLIC_API_URL` unset)
+3. Set live Stripe keys + webhook signing secret
+4. Set `CLIENT_URL` to the Vercel site URL
 
 Success page still confirms payment via `/api/orders/:id/confirm-stripe` if webhook is delayed.
 

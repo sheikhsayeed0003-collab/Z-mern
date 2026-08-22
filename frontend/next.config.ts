@@ -17,9 +17,10 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    // Live: call API via NEXT_PUBLIC_API_URL directly (no rewrite).
+    // Live on Vercel: top-level vercel.json routes /api → backend service.
+    // Live with separate API host: call via NEXT_PUBLIC_API_URL (no rewrite).
     // Local: proxy /api → Express when NEXT_PUBLIC_API_URL is empty.
-    if (PUBLIC_API) return [];
+    if (PUBLIC_API || process.env.VERCEL) return [];
     return [
       {
         source: "/api/:path*",

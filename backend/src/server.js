@@ -46,6 +46,29 @@ app.use(
 );
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
+const isVercel = Boolean(process.env.VERCEL);
+let dbReady = null;
+function ensureDb() {
+  if (!dbReady) {
+    dbReady = connectDB()
+      .then(() => seedIfEmpty())
+      .catch((err) => {
+        dbReady = null;
+        throw err;
+      });
+  }
+  return dbReady;
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureDb();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.post(
   "/api/webhooks/stripe",
   express.raw({ type: "application/json" }),
@@ -118,14 +141,18 @@ app.use((err, _req, res, _next) => {
 
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(async () => {
-    await seedIfEmpty();
-    app.listen(PORT, () => {
-      console.log(`API running on http://localhost:${PORT}`);
+// Vercel loads this file as a serverless function — export the app.
+module.exports = app;
+
+if (!isVercel) {
+  ensureDb()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`API running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to connect DB", err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("Failed to connect DB", err);
-    process.exit(1);
-  });
+}
