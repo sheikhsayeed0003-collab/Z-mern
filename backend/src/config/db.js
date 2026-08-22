@@ -5,13 +5,19 @@ let memoryServer;
 
 async function connectDB() {
   const isProd = process.env.NODE_ENV === "production";
-  let uri = process.env.MONGODB_URI;
+  let uri = (process.env.MONGODB_URI || "").trim();
   const forceMemory = process.env.USE_MEMORY_DB === "true";
 
+  // Production always needs Atlas (or any persistent URI). Memory DB cannot run on Vercel.
   if (isProd) {
-    if (forceMemory || !uri) {
+    if (!uri) {
       throw new Error(
-        "Production requires MONGODB_URI and USE_MEMORY_DB=false (persistent database)."
+        "Missing MONGODB_URI. In Vercel → Settings → Environment Variables, set MONGODB_URI (mongodb+srv://...) and USE_MEMORY_DB=false for Production + Preview, then Redeploy."
+      );
+    }
+    if (forceMemory) {
+      console.warn(
+        "USE_MEMORY_DB=true is ignored in production; using MONGODB_URI instead."
       );
     }
     await mongoose.connect(uri);
