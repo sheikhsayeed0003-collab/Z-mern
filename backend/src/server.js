@@ -25,6 +25,9 @@ function corsOrigins() {
   const list = [
     process.env.CLIENT_URL,
     process.env.CLIENT_URL_WWW,
+    "https://z-mern.vercel.app",
+    "https://z-mern-sayeed8.vercel.app",
+    "https://z-mern-five.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
   ].filter(Boolean);
@@ -32,18 +35,38 @@ function corsOrigins() {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  if (process.env.VERCEL_URL) {
+    list.push(`https://${process.env.VERCEL_URL}`);
+  }
   return [...new Set([...list, ...extra])];
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  const allowed = corsOrigins();
+  if (allowed.includes(origin)) return true;
+  // Vercel preview / alias URLs for this app
+  try {
+    const host = new URL(origin).hostname;
+    if (
+      host === "z-mern.vercel.app" ||
+      (host.endsWith(".vercel.app") && host.includes("z-mern"))
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
 }
 
 app.use(
   cors({
     origin(origin, callback) {
-      const allowed = corsOrigins();
-      // Allow non-browser / same-origin / Stripe tools with no Origin
-      if (!origin || allowed.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      return callback(null, false);
     },
     credentials: true,
   })
