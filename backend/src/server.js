@@ -1,4 +1,8 @@
-require("dotenv").config();
+require("dotenv").config({
+  // Always load backend/.env when present; never override real platform env (Vercel).
+  path: require("path").join(__dirname, "../.env"),
+  override: false,
+});
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -124,6 +128,9 @@ app.get("/api/health", (_req, res) => {
     ok: true,
     stripe: Boolean(process.env.STRIPE_SECRET_KEY),
     webhook: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
+    mongoConfigured: Boolean(
+      (process.env.MONGODB_URI || process.env.MONGO_URI || "").trim()
+    ),
   });
 });
 
